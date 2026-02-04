@@ -93,7 +93,7 @@ export default function Home() {
       <div className="p-4 space-y-4 flex-1">
         <div className="text-center text-gray-500 text-sm mb-2">
           {searchTerm ? (
-            <span>Searching for <span className="font-bold text-emerald-700">"{searchTerm}"</span></span>
+            <span>Searching for <span className="font-bold text-emerald-700">&quot;{searchTerm}&quot;</span></span>
           ) : (
             <span>Showing <span className="font-bold text-emerald-700">{selectedDay}</span> specials</span>
           )}
