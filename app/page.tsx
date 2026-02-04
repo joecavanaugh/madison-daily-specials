@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 
 export default function Home() {
-  const [specials, setSpecials] = useState([])
+  const [specials, setSpecials] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState('')
 
