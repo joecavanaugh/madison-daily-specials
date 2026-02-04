@@ -27,9 +27,21 @@ export default function Home() {
 
   // --- FILTERING ---
   const filteredSpecials = specials.filter(s => {
-    const matchesDay = selectedDay === 'All' || s.day_of_week === selectedDay
+    // 1. Check Day 
+    // Show if:
+    // a) "All" is selected
+    // b) The special is specifically for this day (e.g. "Monday")
+    // c) The special is for "Every Night" (or "Daily", "Every Day")
+    const matchesDay = selectedDay === 'All' || 
+                       s.day_of_week === selectedDay || 
+                       s.day_of_week === 'Every Night' ||
+                       s.day_of_week === 'Every Day' ||
+                       s.day_of_week === 'Daily'
+    
+    // 2. Check Search
     const matchesSearch = searchTerm === '' || 
       s.bar_name.toLowerCase().includes(searchTerm.toLowerCase())
+
     return matchesDay && matchesSearch
   })
 
@@ -45,7 +57,7 @@ export default function Home() {
             Madison Daily Specials
           </h1>
 
-          {/* Search Bar - Centered and limited width on desktop */}
+          {/* Search Bar */}
           <div className="max-w-md mx-auto w-full">
             <input 
               type="text"
@@ -56,7 +68,7 @@ export default function Home() {
             />
           </div>
 
-          {/* Day Filters - Centered */}
+          {/* Day Filters */}
           <div className="flex justify-center">
             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar max-w-full">
               <button
@@ -99,12 +111,11 @@ export default function Home() {
           )}
         </div>
 
-        {/* RESPONSIVE GRID: 1 column on mobile, 2 on tablet, 3 on desktop */}
+        {/* RESPONSIVE GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSpecials.length > 0 ? (
             filteredSpecials.map((special) => (
               <div key={special.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow">
-                {/* Decorative side accent */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${
                   special.day_of_week === 'Friday' || special.day_of_week === 'Saturday' ? 'bg-yellow-400' : 'bg-emerald-500'
                 }`}></div>
@@ -127,7 +138,8 @@ export default function Home() {
                         <h2 className="font-bold text-lg text-gray-800 leading-tight">{special.bar_name}</h2>
                       )}
 
-                      {selectedDay === 'All' && (
+                      {/* Always show tag if it's 'All' OR 'Every Night', so user understands why it's there */}
+                      {(selectedDay === 'All' || special.day_of_week === 'Every Night' || special.day_of_week === 'Daily') && (
                         <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide block mt-1">
                           {special.day_of_week}
                         </span>
@@ -146,9 +158,8 @@ export default function Home() {
               </div>
             ))
           ) : (
-            /* Empty State spans all columns */
             <div className="col-span-full text-center py-20 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
-              No specials found.<br/>Maybe try a different search?
+              No specials found for {selectedDay}.
             </div>
           )}
         </div>
