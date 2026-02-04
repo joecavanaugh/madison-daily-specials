@@ -118,8 +118,9 @@ export default function Home() {
                       </span>
                     )}
                   </div>
+                  {/* UPDATED PRICE BADGE */}
                   <div className="bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded text-sm whitespace-nowrap">
-                    {special.price === 'Varies' ? '$?' : `$${special.price}`}
+                    {special.price === 'Varies' ? 'Variable' : `$${special.price}`}
                   </div>
                 </div>
                 <p className="text-gray-600 mt-1 leading-snug">{special.special_details}</p>
