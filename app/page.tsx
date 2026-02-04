@@ -93,7 +93,7 @@ export default function Home() {
         
         {/* The Money Button */}
         <a 
-          href="https://www.buymeacoffee.com" 
+          href="https://buymeacoffee.com/spinkrith" 
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 font-bold px-6 py-3 rounded-full shadow-md hover:bg-yellow-300 transition-transform hover:-translate-y-1"
