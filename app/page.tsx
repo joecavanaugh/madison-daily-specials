@@ -6,7 +6,6 @@ export default function Home() {
   const [specials, setSpecials] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
-  // Search and Filter State
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDay, setSelectedDay] = useState('All')
 
@@ -26,15 +25,11 @@ export default function Home() {
     setLoading(false)
   }
 
-  // --- FILTERING LOGIC ---
+  // --- FILTERING ---
   const filteredSpecials = specials.filter(s => {
-    // 1. Check Day (Pass if "All" is selected OR matches specific day)
     const matchesDay = selectedDay === 'All' || s.day_of_week === selectedDay
-    
-    // 2. Check Search Text (Pass if search is empty OR bar name matches)
     const matchesSearch = searchTerm === '' || 
       s.bar_name.toLowerCase().includes(searchTerm.toLowerCase())
-
     return matchesDay && matchesSearch
   })
 
@@ -49,7 +44,6 @@ export default function Home() {
           Madison Daily Specials
         </h1>
 
-        {/* Search Bar */}
         <input 
           type="text"
           placeholder="🔍 Find a bar..."
@@ -58,9 +52,7 @@ export default function Home() {
           className="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400"
         />
 
-        {/* Day Filters */}
         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-          {/* 'All' Button */}
           <button
             onClick={() => setSelectedDay('All')}
             className={`px-4 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
@@ -72,7 +64,6 @@ export default function Home() {
             All
           </button>
 
-          {/* Day Buttons */}
           {days.map(day => (
             <button
               key={day}
@@ -102,7 +93,6 @@ export default function Home() {
         {filteredSpecials.length > 0 ? (
           filteredSpecials.map((special) => (
             <div key={special.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
-              {/* Decorative side accent */}
               <div className={`absolute left-0 top-0 bottom-0 w-1 ${
                 special.day_of_week === 'Friday' || special.day_of_week === 'Saturday' ? 'bg-yellow-400' : 'bg-emerald-500'
               }`}></div>
@@ -110,15 +100,27 @@ export default function Home() {
               <div className="pl-2">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="font-bold text-lg text-gray-800">{special.bar_name}</h2>
-                    {/* Show Day Tag if viewing 'All' */}
+                    {/* NEW: CLICKABLE BAR NAME */}
+                    {special.source_url ? (
+                      <a 
+                        href={special.source_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="font-bold text-lg text-emerald-700 hover:underline flex items-center gap-1"
+                      >
+                        {special.bar_name} 
+                        <span className="text-xs">↗</span>
+                      </a>
+                    ) : (
+                      <h2 className="font-bold text-lg text-gray-800">{special.bar_name}</h2>
+                    )}
+
                     {selectedDay === 'All' && (
-                      <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide">
+                      <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide block">
                         {special.day_of_week}
                       </span>
                     )}
                   </div>
-                  {/* UPDATED PRICE BADGE */}
                   <div className="bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded text-sm whitespace-nowrap">
                     {special.price === 'Varies' ? 'Variable' : `$${special.price}`}
                   </div>
