@@ -10,10 +10,10 @@ from bs4 import BeautifulSoup
 from supabase import create_client, Client
 from openai import OpenAI
 
-# --- 1. SECURE CONFIGURATIONs ---
-SUPABASE_URL = "https://elcikekczeaxnooncqjr.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsY2lrZWtjemVheG5vb25jcWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMTc0MTAsImV4cCI6MjA4NTc5MzQxMH0.JniHNE46X2GQWvPjslHFRjRo1mfKTRVeFh6iW2rF0kA"
-GROQ_API_KEY = "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"
+# --- 1. SECURE CONFIGURATION ---
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY or not GROQ_API_KEY:
     raise ValueError("❌ Missing API Keys in Environment Variables!")
