@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from supabase import create_client, Client
 from openai import OpenAI
 
-# --- 1. SECURE CONFIGURATION ---
+# --- 1. SECURE CONFIGURATIONs ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
@@ -34,26 +34,34 @@ TARGETS = [
     {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]}
 ]
 
-# --- 3. HELPER FUNCTION (The Fix) ---
+# --- THE NEW & IMPROVED CLEANER ---
 def clean_ai_response(raw_text):
     """
-    Finds the first '[' and the last ']' to extract ONLY the JSON array.
-    Ignores any 'Chatty' text before or after.
+    Surgically extracts the first valid JSON array found in the text.
+    Walks through the string to find the matching closing bracket ']',
+    ignoring any garbage text before or after.
     """
-    try:
-        # Use Regex to find the JSON array pattern
-        match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-        if match:
-            return match.group(0)
-        else:
-            # Fallback: simple string slicing if regex fails
-            start = raw_text.find('[')
-            end = raw_text.rfind(']')
-            if start != -1 and end != -1:
-                return raw_text[start:end+1]
-            return "[]" # Return empty array if nothing found
-    except Exception:
-        return "[]"
+    # 1. Find the start of the array
+    start_index = raw_text.find('[')
+    if start_index == -1:
+        return "[]" # No array found
+
+    # 2. Walk through the string to find the matching closing bracket
+    bracket_count = 0
+    for i in range(start_index, len(raw_text)):
+        char = raw_text[i]
+        if char == '[':
+            bracket_count += 1
+        elif char == ']':
+            bracket_count -= 1
+            
+        # If we hit zero, we found the closing bracket for the main array
+        if bracket_count == 0:
+            potential_json = raw_text[start_index : i+1]
+            return potential_json
+
+    # 3. If we finish the loop without balancing, something is wrong
+    return "[]"
 
 # --- 4. SCRAPER LOGIC ---
 async def scrape_bar(target):
