@@ -3,14 +3,14 @@ import json
 import os
 import requests
 import io
-import re  # <--- NEW: Added Regex tool
+import re
 from pypdf import PdfReader
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
 from openai import OpenAI
 
-# --- 1. SECURE CONFIGURATIONs ---
+# --- 1. SECURE CONFIGURATION ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
@@ -31,10 +31,13 @@ TARGETS = [
     {"name": "The Nitty Gritty", "urls": ["https://www.thegritty.com/event/happy-hour/", "https://www.thegritty.com/event/power-hour/"]},
     {"name": "State Street Brats", "urls": ["https://statestreetbrats.com/specials/"]},
     {"name": "RED", "urls": ["https://red-madison.com/wp-content/uploads/2025/11/RED_HappyHourMenu_Digital.pdf"]},
-    {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]}
+    {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]},
+    # --- NEW ADDITIONS ---
+    {"name": "Canteen", "urls": ["https://www.canteentaco.com/event/happy-hour/"]},
+    {"name": "Cento", "urls": ["https://www.centomadison.com/menus/#happy-hour"]}
 ]
 
-# --- THE NEW & IMPROVED CLEANER ---
+# --- 3. HELPER FUNCTION (The Surgical Fix) ---
 def clean_ai_response(raw_text):
     """
     Surgically extracts the first valid JSON array found in the text.
@@ -61,7 +64,7 @@ def clean_ai_response(raw_text):
             return potential_json
 
     # 3. If we finish the loop without balancing, something is wrong
-    return "[]"
+    return "[]" 
 
 # --- 4. SCRAPER LOGIC ---
 async def scrape_bar(target):
@@ -125,9 +128,9 @@ async def scrape_bar(target):
             )
             ai_response = completion.choices[0].message.content
             
-            # --- USE THE NEW CLEANER ---
+            # --- USE THE CLEANER ---
             clean_json = clean_ai_response(ai_response)
-            # ---------------------------
+            # -----------------------
             
             specials_data = json.loads(clean_json)
             print(f"      Found {len(specials_data)} specials.")
@@ -144,7 +147,6 @@ async def scrape_bar(target):
                 
         except Exception as e:
             print(f"      ❌ Error processing AI: {e}")
-            # print(f"DEBUG RESPONSE: {ai_response}") # Uncomment if you need to debug later
 
 # --- 5. MAIN LOOP ---
 async def run_all():
