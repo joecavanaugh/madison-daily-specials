@@ -3,15 +3,14 @@ import json
 import os
 import requests
 import io
+import re  # <--- NEW: Added Regex tool
 from pypdf import PdfReader
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
 from openai import OpenAI
 
-# Note: We removed nest_asyncio because standard Python scripts run differently than Colab
-
-# --- 1. SECURE CONFIGURATION (Reads from GitHub Secrets) ---
+# --- 1. SECURE CONFIGURATION ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
@@ -35,13 +34,34 @@ TARGETS = [
     {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]}
 ]
 
-# --- 3. SCRAPER LOGIC ---
+# --- 3. HELPER FUNCTION (The Fix) ---
+def clean_ai_response(raw_text):
+    """
+    Finds the first '[' and the last ']' to extract ONLY the JSON array.
+    Ignores any 'Chatty' text before or after.
+    """
+    try:
+        # Use Regex to find the JSON array pattern
+        match = re.search(r'\[.*\]', raw_text, re.DOTALL)
+        if match:
+            return match.group(0)
+        else:
+            # Fallback: simple string slicing if regex fails
+            start = raw_text.find('[')
+            end = raw_text.rfind(']')
+            if start != -1 and end != -1:
+                return raw_text[start:end+1]
+            return "[]" # Return empty array if nothing found
+    except Exception:
+        return "[]"
+
+# --- 4. SCRAPER LOGIC ---
 async def scrape_bar(target):
     print(f"\n1. 🕵️‍♀️ Visiting {target['name']}...")
     try:
         supabase.table('specials').delete().eq('bar_name', target['name']).execute()
     except Exception as e:
-        print(f"   ⚠️ Database error (might be empty): {e}")
+        print(f"   ⚠️ Database error: {e}")
 
     for url in target['urls']:
         raw_text = ""
@@ -96,9 +116,10 @@ async def scrape_bar(target):
                 temperature=0,
             )
             ai_response = completion.choices[0].message.content
-            clean_json = ai_response.replace('```json', '').replace('```', '').strip()
-            if "{" in clean_json:
-                clean_json = clean_json[clean_json.find("["):clean_json.rfind("]")+1]
+            
+            # --- USE THE NEW CLEANER ---
+            clean_json = clean_ai_response(ai_response)
+            # ---------------------------
             
             specials_data = json.loads(clean_json)
             print(f"      Found {len(specials_data)} specials.")
@@ -115,8 +136,9 @@ async def scrape_bar(target):
                 
         except Exception as e:
             print(f"      ❌ Error processing AI: {e}")
+            # print(f"DEBUG RESPONSE: {ai_response}") # Uncomment if you need to debug later
 
-# --- 4. MAIN LOOP ---
+# --- 5. MAIN LOOP ---
 async def run_all():
     print(f"🚀 Starting Cloud Scraper Job...")
     for target in TARGETS:
