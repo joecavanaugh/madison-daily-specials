@@ -4,6 +4,7 @@ import os
 import requests
 import io
 import re
+import base64
 from pypdf import PdfReader
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
@@ -32,25 +33,18 @@ TARGETS = [
     {"name": "State Street Brats", "urls": ["https://statestreetbrats.com/specials/"]},
     {"name": "RED", "urls": ["https://red-madison.com/wp-content/uploads/2025/11/RED_HappyHourMenu_Digital.pdf"]},
     {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]},
-    # --- NEW ADDITIONS ---
     {"name": "Canteen", "urls": ["https://www.canteentaco.com/event/happy-hour/"]},
     {"name": "Cento", "urls": ["https://www.centomadison.com/menus/#happy-hour"]},
-    {"name": "Weary Traveler Freehouse", "urls": ["https://wearytravelerfreehouse.com/magic-hour-happy-hour/"]}
+    # --- WEARY TRAVELER IMAGE URL ---
+    {"name": "Weary Traveler Freehouse", "urls": ["https://wearytravelerfreehouse.com/wp-content/uploads/2025/10/Magic-Hour-Fall-2025-768x593.jpg"]}
 ]
 
 # --- 3. HELPER FUNCTION (The Surgical Fix) ---
 def clean_ai_response(raw_text):
-    """
-    Surgically extracts the first valid JSON array found in the text.
-    Walks through the string to find the matching closing bracket ']',
-    ignoring any garbage text before or after.
-    """
-    # 1. Find the start of the array
     start_index = raw_text.find('[')
     if start_index == -1:
-        return "[]" # No array found
+        return "[]" 
 
-    # 2. Walk through the string to find the matching closing bracket
     bracket_count = 0
     for i in range(start_index, len(raw_text)):
         char = raw_text[i]
@@ -59,12 +53,10 @@ def clean_ai_response(raw_text):
         elif char == ']':
             bracket_count -= 1
             
-        # If we hit zero, we found the closing bracket for the main array
         if bracket_count == 0:
             potential_json = raw_text[start_index : i+1]
             return potential_json
 
-    # 3. If we finish the loop without balancing, something is wrong
     return "[]" 
 
 # --- 4. SCRAPER LOGIC ---
@@ -77,9 +69,24 @@ async def scrape_bar(target):
 
     for url in target['urls']:
         raw_text = ""
+        is_image = url.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+        image_data_url = None
         
+        # IMAGE HANDLING
+        if is_image:
+            print(f"   🖼️ Downloading Image: {url}")
+            try:
+                response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+                response.raise_for_status()
+                base64_image = base64.b64encode(response.content).decode('utf-8')
+                content_type = response.headers.get('Content-Type', 'image/jpeg')
+                image_data_url = f"data:{content_type};base64,{base64_image}"
+            except Exception as e:
+                print(f"      ❌ Image Error: {e}")
+                continue
+
         # PDF HANDLING
-        if url.lower().endswith('.pdf'):
+        elif url.lower().endswith('.pdf'):
             print(f"   📄 Downloading PDF: {url}")
             try:
                 response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -111,28 +118,44 @@ async def scrape_bar(target):
                 await browser.close()
 
         # AI PROCESSING
-        prompt = f"""
-        You are a data extraction robot. Extract 'Daily Specials' from the text below into JSON.
-        RAW TEXT: {raw_text}
+        prompt_instructions = """
+        You are a data extraction robot. Extract 'Daily Specials' from the provided menu information into JSON.
         INSTRUCTIONS:
-        1. Extract all daily deals, Happy Hours.
-        2. CRITICAL: For 'special_details', include specifics (times, exact discount).
-        3. Schema: [{{"day_of_week": "Monday", "special_details": "...", "price": "..."}}]
-        4. RULES: Price like "4.00" if specific, else "Varies". Split multi-day deals.
+        1. Extract all daily deals and Happy Hours.
+        2. CRITICAL: For 'special_details', include specific times and exact discounts (e.g. "$1 off taps, 4pm-5:30pm").
+        3. Schema: [{"day_of_week": "Monday", "special_details": "...", "price": "..."}]
+        4. RULES: Price like "4.00" if specific, else "Varies". 
+        5. CRITICAL RULE: If a deal is multi-day (like "M-F" or "Monday-Friday"), you MUST split it into separate objects for EACH full day name ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday").
         """
         
         try:
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0,
-            )
+            # Send to Vision Model if Image
+            if is_image and image_data_url:
+                completion = client.chat.completions.create(
+                    model="llama-3.2-90b-vision-preview",
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": prompt_instructions},
+                                {"type": "image_url", "image_url": {"url": image_data_url}}
+                            ]
+                        }
+                    ],
+                    temperature=0,
+                )
+            # Send to Text Model if Web/PDF
+            else:
+                prompt_text = prompt_instructions + f"\nRAW TEXT: {raw_text}"
+                completion = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[{"role": "user", "content": prompt_text}],
+                    temperature=0,
+                )
+            
             ai_response = completion.choices[0].message.content
             
-            # --- USE THE CLEANER ---
             clean_json = clean_ai_response(ai_response)
-            # -----------------------
-            
             specials_data = json.loads(clean_json)
             print(f"      Found {len(specials_data)} specials.")
             
