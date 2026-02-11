@@ -189,18 +189,47 @@ export default function Home() {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="p-8 text-center text-gray-500 text-sm bg-white border-t border-gray-100 mt-auto">
-        <p className="mb-4">Built with ❤️ in Madison</p>
-        <a 
-          href="https://buymeacoffee.com/spinkrith" 
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 font-bold px-6 py-3 rounded-full shadow-md hover:bg-yellow-300 transition-transform hover:-translate-y-1"
-        >
-          <span>🍺</span>
-          <span>Buy the developer a beer</span>
-        </a>
+    {/* FOOTER */}
+    <footer className="bg-stone-900 text-stone-400 py-12 mt-12 text-center text-sm border-t-4 border-red-800">
+        <div className="max-w-4xl mx-auto px-6">
+          <p className="mb-8 font-medium text-lg text-stone-300 flex items-center justify-center gap-2">
+            Built with 🧀 & 🍺 in Madison, WI
+          </p>
+          
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+            {/* Donate Button */}
+            <a 
+              href="https://buymeacoffee.com/spinkrith" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-stone-900 font-bold px-6 py-3 rounded-full transition-transform hover:-translate-y-1 shadow-lg shadow-amber-900/20 w-full md:w-auto"
+            >
+              <span>🍻</span>
+              <span>Buy the dev a beer</span>
+            </a>
+            
+            {/* Email Contact Button */}
+            <a 
+              href="mailto:madisonspecials@gmail.com?subject=Madison%20Specials%20App"
+              className="inline-flex items-center justify-center gap-2 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold px-6 py-3 rounded-full transition-colors border border-stone-700 w-full md:w-auto"
+            >
+              <span>✉️</span>
+              <span>Contact Us</span>
+            </a>
+          </div>
+          
+          {/* Helper Text */}
+          <div className="text-xs opacity-60 max-w-lg mx-auto leading-relaxed space-y-4">
+            <p>
+              Got feedback, found an issue, or want to request a new bar? <br />
+              Email us directly at <a href="mailto:madisonspecials@gmail.com" className="text-amber-400 hover:text-amber-300 transition-colors font-medium">madisonspecials@gmail.com</a>
+            </p>
+            <p>
+              Disclaimer: Prices and availability are subject to change. <br/>
+              Please drink responsibly and get a safe ride home.
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   )
