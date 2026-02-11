@@ -51,11 +51,21 @@ export default function Home() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       
       {/* HEADER */}
-      <div className="bg-emerald-800 shadow-lg sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto p-4 space-y-4">
-          <h1 className="text-2xl font-bold text-center text-white">
-            Madison Daily Specials
-          </h1>
+      <div className="bg-gradient-to-r from-red-900 via-red-800 to-orange-600 shadow-xl sticky top-0 z-20">
+        {/* Subtle background glow effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-white/5 blur-3xl pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto p-4 space-y-4 relative z-10">
+          
+          {/* Title Area */}
+          <div className="text-center pt-2">
+            <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-2 backdrop-blur-sm border border-white/30">
+              Madison, WI
+            </span>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight drop-shadow-md flex items-center justify-center gap-2">
+              Daily Specials <span className="hover:animate-spin cursor-pointer transition-transform inline-block">🍻</span>
+            </h1>
+          </div>
 
           {/* Search Bar */}
           <div className="max-w-md mx-auto w-full">
@@ -64,19 +74,19 @@ export default function Home() {
               placeholder="🔍 Find a bar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-inner"
+              className="w-full px-5 py-3 rounded-xl border-0 bg-white/95 text-gray-900 focus:outline-none focus:ring-4 focus:ring-amber-400 shadow-inner placeholder-gray-500 transition-all font-medium"
             />
           </div>
 
           {/* Day Filters */}
-          <div className="flex justify-center">
-            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar max-w-full">
+          <div className="flex justify-center pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar max-w-full px-2">
               <button
                 onClick={() => setSelectedDay('All')}
-                className={`px-4 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all shadow-sm ${
                   selectedDay === 'All' 
-                    ? 'bg-yellow-400 text-emerald-900' 
-                    : 'bg-emerald-700 text-emerald-100 hover:bg-emerald-600'
+                    ? 'bg-amber-400 text-red-950 scale-105' 
+                    : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/10'
                 }`}
               >
                 All
@@ -86,10 +96,10 @@ export default function Home() {
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`px-4 py-1 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
+                  className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all shadow-sm ${
                     selectedDay === day 
-                      ? 'bg-yellow-400 text-emerald-900' 
-                      : 'bg-emerald-700 text-emerald-100 hover:bg-emerald-600'
+                      ? 'bg-amber-400 text-red-950 scale-105' 
+                      : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm border border-white/10'
                   }`}
                 >
                   {day.substring(0, 3)}
