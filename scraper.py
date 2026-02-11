@@ -34,7 +34,7 @@ TARGETS = [
     {"name": "Double Tap Beer Arcade", "urls": ["https://www.doubletapbeercade.com/location/madison/"]},
     # --- NEW ADDITIONS ---
     {"name": "Canteen", "urls": ["https://www.canteentaco.com/event/happy-hour/"]},
-    {"name": "Cento", "urls": ["https://www.centomadison.com/menus/#happy-hour"]}
+    {"name": "Cento", "urls": ["https://www.centomadison.com/menus/#happy-hour"]},
     {"name": "Weary Traveler Freehouse", "urls": ["https://wearytravelerfreehouse.com/magic-hour-happy-hour/"]}
 ]
 
